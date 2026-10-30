@@ -6,7 +6,7 @@
 答题方式二选一：
 
 - **本地逻辑**：题库 + 规则推理，不联网、不需要 Key；
-- **大模型辅助**：题目交给 LLM 作答。首次启用会引导填写接口地址、模型、API Key 并保存，之后每次启动问一句是否沿用。
+- **大模型辅助**：题目交给 LLM 作答。首次启用会引导填写接口地址、模型、API Key 并保存，之后每次启用都先验证连通性，失败会引导重填。
 
 > 仅适用于 **Windows 10/11**。首次运行会从国内镜像自动补齐 Node.js 与无头浏览器，开箱即用。
 > 仅供个人学习与自动化测试使用，请勿用于任何违规用途。
@@ -40,7 +40,7 @@
   接口地址 [https://api.deepseek.com]：
   模型名称 [deepseek-chat]：
   API Key：
-  已保存到 D:\work-space\1\llm-config.json
+  已保存到 <项目目录>\llm-config.json
   正在验证连通性…
   连接正常 √
 ```
@@ -172,9 +172,28 @@ powershell -ExecutionPolicy Bypass -File bootstrap.ps1 -Root D:\zacy   :: 指定
 | `启动答题.bat` | 入口：调用引导脚本 | ✔ |
 | `bootstrap.ps1` | 环境检查 / 自动下载安装 / 启动答题 | ✔ |
 | `mock-exam.js` | 答题主逻辑（单文件，无第三方依赖） | ✔ |
-| `answer-bank.json` | 题库：题目 id → 标准答案，随批阅自动增长 | ✔（初始为空） |
+| `answer-bank.json` | 题库：题目 id → 标准答案，随批阅自动增长 | ✘ 忽略（个人练习数据） |
+| `answer-bank.example.json` | 空题库模板，仓库里只提交这个 | ✔ |
 | `llm-config.json` | 大模型接口配置（含明文 Key） | ✘ 忽略（首次配置时生成） |
 | `shots/` | 成绩截图输出目录 | ✘ 忽略（运行时生成） |
+
+## 隐私与安全
+
+准备上传 GitHub 时，先确认下面这些**不要进仓库**：
+
+| 内容 | 原因 | 现状 |
+|---|---|---|
+| `llm-config.json` | 含明文 API Key | 已 `.gitignore` |
+| `shots/` | 成绩截图，可能含昵称、分数 | 已 `.gitignore` |
+| `_scan/` 等本地临时目录 | 系统扫描/清理产物，可能含软件清单、本机路径 | 已 `.gitignore` |
+| `answer-bank.json` | 个人练习记录（题目 id + 标准答案） | 已 `.gitignore`；仓库只带空模板 `answer-bank.example.json`，运行时自动重建 |
+
+另外：
+
+- 仓库里不要出现考号、密码、token；脚本只在运行时使用，不写盘。
+- 如果 `llm-config.json` 曾被提交过，先去模型服务商后台**吊销该 Key** 再换新的，光删文件不够。
+- 上传前跑一遍 `git status` 和 `git ls-files` 确认没有意外文件；`git check-ignore -v <路径>` 可以验证忽略规则是否生效。
+- 截图文件名里会带考试标题，介意的话把 `shots/` 整个排除即可（已默认排除）。
 
 ## 注意事项
 
